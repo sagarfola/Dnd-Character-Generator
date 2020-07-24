@@ -40,6 +40,7 @@ namespace Dnd_Character_Generator
             int xp, xpNext, xpMod;                                      // Current Xp, XP to next level, Xp modifier based on prime requistite
             int hp, level;                                              // Maximum HP and Character Level
             int listenDoors, findTrap, findSecretDoor;                  // Standard listen at doors, find room traps, and finding secret doors
+            int primeReq1, primeReq2;                                    // Storage values for prime requisite scores. Most classes only use one.
             
             // File that defines saving throw values. THAC0, and XP 
             string filePath = "C:/Users/sagar/source/repos/Dnd Character Generator/Dnd Character Generator/SavingThrows_THAC0.csv";                                            // 
@@ -61,6 +62,32 @@ namespace Dnd_Character_Generator
 
             // ** CHOOSE CLASS **
             charClass = GetClass(abilityScore[1], abilityScore[3], abilityScore[4]);
+
+            // ** STORE PRIME REQUISITE VALUES
+            primeReq2 = 0;                          // Most classes do not use this value
+
+            if (charClass == "Cleric")
+            {
+                primeReq1 = abilityScore[2];
+            } else if (charClass == "Elf")
+            {
+                primeReq1 = abilityScore[1];
+                primeReq2 = abilityScore[0];
+            } else if (charClass == "Dwarf" || charClass == "Fighter")
+            {
+                primeReq1 = abilityScore[0];
+            } else if (charClass == "Magic-User")
+            {
+                primeReq1 = abilityScore[1];
+            } else if (charClass == "Thief")
+            {
+                primeReq1 = abilityScore[3];
+            }
+            else
+            {
+                primeReq1 = abilityScore[3];
+                primeReq2 = abilityScore[0];
+            }
 
             // ** USE MODIFIERS TO GENERATE VARIOUS SCORES
 
@@ -105,6 +132,9 @@ namespace Dnd_Character_Generator
             // ** GENERATE HIT POINTS
             hp = GetHP(charClass, abilityMod[4], level);
 
+            // ** GENERATE XP MODIFIER
+            xpMod = GetXPModifier(charClass, primeReq1, primeReq2);
+
             // ** GET SAVING THROWS, AND THAC0
             death = ReadCsv(filePath, charClass, level)[0];
             wands = ReadCsv(filePath, charClass, level)[1];
@@ -117,6 +147,7 @@ namespace Dnd_Character_Generator
 
             Console.WriteLine("Class: " + charClass + "   Level: " + level);
             Console.WriteLine("XP: " + xp + ", XP to Next Level: " + xpNext);
+            Console.WriteLine("XP Modifier: " + xpMod + "%");
             Console.WriteLine("Max HP: " + hp);
             Console.WriteLine("THAC0: " + thaco);
             Console.WriteLine("D" + death + " W" + wands + " P" + paralysis + " B" + breath + " S" + spells);
@@ -310,6 +341,73 @@ namespace Dnd_Character_Generator
             } else { 
                 result = -3;
             }
+            return result;
+        }
+
+        static int GetXPModifier(string searchClass, int primeReq1, int primeReq2)
+        {
+            int result;
+            // This method generates the XP modifier based on the prime requisite(s) of the chosen class
+            if (searchClass == "Elf")
+            {
+                if (primeReq1 >= 16 && primeReq2 >= 13)
+                {
+                    result = 10;
+                } else if (15 >= primeReq1 && primeReq1 >= 13 && primeReq2 >= 13)
+                {
+                    result = 5;
+                } else if (8 >= primeReq1 && primeReq1 > 5 && 8 >= primeReq2 && primeReq2 > 5)
+                {
+                    result = -5;
+                } else if (5 >= primeReq1 && 5 >= primeReq2)
+                {
+                    result = -10;
+                }
+                else
+                {
+                    result = 0;
+                }
+            } else if (searchClass == "Halfling")
+            {
+                if (primeReq1 >= 16 && primeReq2 >= 16)
+                {
+                    result = 10;
+                } else if (primeReq1 >= 13 || primeReq2 >= 13)
+                {
+                    result = 5;
+                } else if (8 >= primeReq1 && primeReq1 > 5 && 8 >= primeReq2 && primeReq2 > 5)
+                {
+                    result = -5;
+                } else if (5 >= primeReq1 && 5 >= primeReq2)
+                {
+                    result = -10;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+            else
+            {
+                if (primeReq1 > 15)
+                {
+                    result = 10;
+                } else if (15 >= primeReq1 && primeReq1 > 12)
+                {
+                    result = 5;
+                } else if (8 >= primeReq1 && primeReq1 > 5)
+                {
+                    result = -5;
+                } else if (5 >= primeReq1)
+                {
+                    result = -10;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+
             return result;
         }
 
