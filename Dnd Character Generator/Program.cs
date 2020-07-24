@@ -100,7 +100,7 @@ namespace Dnd_Character_Generator
             }
 
             // ** DETERMINE CHARACTER LEVEL
-            level = GetLevel();
+            level = GetLevel(charClass);
 
             // ** GENERATE HIT POINTS
             hp = GetHP(charClass, abilityMod[4], level);
@@ -133,9 +133,6 @@ namespace Dnd_Character_Generator
             Console.WriteLine("Listen at Doors: " + listenDoors + "-in-6");
             Console.WriteLine("Find Room Traps: " + findTrap + "-in-6");
             Console.WriteLine("Find Secret Doors: " + findSecretDoor + "-in-6");
-
-
-
 
             Console.ReadLine();
 
@@ -225,12 +222,19 @@ namespace Dnd_Character_Generator
                 return result;
             }
 
-            int GetLevel()
+            int GetLevel(string searchClass)
             {
                 // This function determines the character's level randomly from 1 to 9 (pre-name level)
                 int result;
 
-                result = rnd.Next(1, 10);
+                if (searchClass == "Halfling")
+                {
+                    result = rnd.Next(1, 9);   // Halfling level Cap is 8
+                }
+                else
+                {
+                    result = rnd.Next(1, 10);
+                }
 
                 return result;
             }
