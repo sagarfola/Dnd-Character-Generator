@@ -94,6 +94,7 @@ namespace Dnd_Character_Generator
             // ** GENERATE HIT POINTS
             hp = GetHP(charClass, abilityMod[4]);
 
+
             Console.WriteLine("Class: " + charClass);
             Console.WriteLine("Max HP: " + hp);
             Console.WriteLine("Str: " + abilityScore[0] + " | " + abilityMod[0]);
@@ -110,8 +111,8 @@ namespace Dnd_Character_Generator
             Console.WriteLine("Find Room Traps: " + findTrap + "-in-6");
             Console.WriteLine("Find Secret Doors: " + findSecretDoor + "-in-6");
 
+            ReadCsv("C:/Users/sagar/source/repos/Dnd Character Generator/Dnd Character Generator/SavingThrows_THAC0.csv", charClass, 1);
 
-            ReadCsv("C:/Users/sagar/source/repos/Dnd Character Generator/Dnd Character Generator/SavingThrows_THAC0.csv");
 
 
             Console.ReadLine();
@@ -248,33 +249,31 @@ namespace Dnd_Character_Generator
             return result;
         }
 
-        static void ReadCsv(string filePath)
+        static void ReadCsv(string filePath, string searchClass, int searchlevel)
         {
-            StreamReader readFile = new StreamReader(filePath);
-            string line;
-            string[] row;
-            readFile.ReadLine();
-            while ((line = readFile.ReadLine()) != null)
+            var strLines = File.ReadLines(filePath);
+            foreach (var line in strLines)
             {
-                row = line.Split(',');
-                string Class = row[0];
-                int level = Convert.ToInt32(row[1]);
-                int death = Convert.ToInt32(row[2]);
-                int wands = Convert.ToInt32(row[3]);
-                int paralysis = Convert.ToInt32(row[4]);
-                int breath = Convert.ToInt32(row[5]);
-                int spells = Convert.ToInt32(row[6]);
-                int thaco = Convert.ToInt32(row[7]);
-                int xp = Convert.ToInt32(row[8]);
+                if (line.Split(',')[0].Equals(searchClass) && line.Split(',')[1].Equals(searchlevel))
+                {
+                    int death = Convert.ToInt32(line.Split(',')[2]);
+                    int wands = Convert.ToInt32(line.Split(',')[3]);
+                    int paralysis = Convert.ToInt32(line.Split(',')[4]);
+                    int breath = Convert.ToInt32(line.Split(',')[5]);
+                    int spells = Convert.ToInt32(line.Split(',')[6]);
+                    int thac0 = Convert.ToInt32(line.Split(',')[7]);
+                    int xp = Convert.ToInt32(line.Split(',')[8]);
 
-                Console.WriteLine(death);
-                Console.WriteLine(wands);
-                Console.WriteLine(paralysis);
-                Console.WriteLine(breath);
-                Console.WriteLine(spells);
-                Console.WriteLine(thaco);
-                Console.WriteLine(xp);
+                    Console.WriteLine(death);
+                    Console.WriteLine(wands);
+                    Console.WriteLine(paralysis);
+                    Console.WriteLine(breath);
+                    Console.WriteLine(spells);
+                    Console.WriteLine(thac0);
+                    Console.WriteLine(xp);
+                }
             }
+
 
         }
     }
