@@ -38,9 +38,11 @@ namespace Dnd_Character_Generator
             int opendoors, language, loyalty, max_retain, min_retain;   // Values to hold open door check value, # of languages known, loyalty, and min/max retainers 
             int melatk, rngatk;                                         // Attack modifiers
             int xp, xpNext, xpMod;                                      // Current Xp, XP to next level, Xp modifier based on prime requistite
-            int hp;                                                     // Maximum HP
+            int hp, level;                                              // Maximum HP and Character Level
             int listenDoors, findTrap, findSecretDoor;                  // Standard listen at doors, find room traps, and finding secret doors
-
+            
+            // File that defines saving throw values. THAC0, and XP 
+            string filePath = "C:/Users/sagar/source/repos/Dnd Character Generator/Dnd Character Generator/SavingThrows_THAC0.csv";                                            // 
 
             // Define the random seed to use for all die rolls
             Random rnd = new Random();
@@ -61,7 +63,13 @@ namespace Dnd_Character_Generator
             charClass = GetClass(abilityScore[1], abilityScore[3], abilityScore[4]);
 
             // ** USE MODIFIERS TO GENERATE VARIOUS SCORES
-            opendoors = 2 + abilityMod[0];      // Open Doors Check
+
+            if (abilityMod[0] < 0) {            // Open Doors Check
+                opendoors = 1;
+            }
+            else {
+                opendoors = 2 + abilityMod[0];      
+            }
 
             melatk = abilityMod[0];             // Melee attack bonus
 
@@ -91,12 +99,27 @@ namespace Dnd_Character_Generator
                 findSecretDoor = 1;
             }
 
+            // ** DETERMINE CHARACTER LEVEL
+            level = GetLevel();
+
             // ** GENERATE HIT POINTS
-            hp = GetHP(charClass, abilityMod[4]);
+            hp = GetHP(charClass, abilityMod[4], level);
 
+            // ** GET SAVING THROWS, AND THAC0
+            death = ReadCsv(filePath, charClass, level)[0];
+            wands = ReadCsv(filePath, charClass, level)[1];
+            paralysis = ReadCsv(filePath, charClass, level)[2];
+            breath = ReadCsv(filePath, charClass, level)[3];
+            spells = ReadCsv(filePath, charClass, level)[4];
+            thaco = ReadCsv(filePath, charClass, level)[5];
+            xp = ReadCsv(filePath, charClass, level)[6];
+            xpNext = ReadCsv(filePath, charClass, level)[7];
 
-            Console.WriteLine("Class: " + charClass);
+            Console.WriteLine("Class: " + charClass + "   Level: " + level);
+            Console.WriteLine("XP: " + xp + ", XP to Next Level: " + xpNext);
             Console.WriteLine("Max HP: " + hp);
+            Console.WriteLine("THAC0: " + thaco);
+            Console.WriteLine("D" + death + " W" + wands + " P" + paralysis + " B" + breath + " S" + spells);
             Console.WriteLine("Str: " + abilityScore[0] + " | " + abilityMod[0]);
             Console.WriteLine("Int: " + abilityScore[1] + " | " + abilityMod[1]);
             Console.WriteLine("Wis: " + abilityScore[2] + " | " + abilityMod[2]);
@@ -111,7 +134,6 @@ namespace Dnd_Character_Generator
             Console.WriteLine("Find Room Traps: " + findTrap + "-in-6");
             Console.WriteLine("Find Secret Doors: " + findSecretDoor + "-in-6");
 
-            ReadCsv("C:/Users/sagar/source/repos/Dnd Character Generator/Dnd Character Generator/SavingThrows_THAC0.csv", charClass, 1);
 
 
 
@@ -123,11 +145,12 @@ namespace Dnd_Character_Generator
                 //   [dieSize] size and adds the results which is passed
                 //   in the result
             {
-                int[] rolls = new int[dieSize];
+                int[] rolls = new int[dieNum];
 
-                for (int i = 1; i <= dieNum; i++)
+                for (int i = 0; i <= dieNum - 1; i++)
                 {
                     rolls[i] = rnd.Next(1, dieSize + 1);
+                    //Console.WriteLine(rolls[i]);
                 }
 
                 int result = rolls.Sum();
@@ -180,7 +203,7 @@ namespace Dnd_Character_Generator
                         result = "Fighter";
                         break;
                     case 3:
-                        result = "Magic User";
+                        result = "Magic-User";
                         break;
                     case 4:
                         result = "Thief";
@@ -202,26 +225,63 @@ namespace Dnd_Character_Generator
                 return result;
             }
 
-            int GetHP(string job, int stat)
+            int GetLevel()
+            {
+                // This function determines the character's level randomly from 1 to 9 (pre-name level)
+                int result;
+
+                result = rnd.Next(1, 10);
+
+                return result;
+            }
+
+            int GetHP(string searchClass, int constitution, int searchLevel)
             {
                 // This function calculates the starting hit points of the character based on
                 //  the class' hit die modified by constitution
 
-                int result;
+                int[] result = new int[searchLevel];
 
-                if (job == "Cleric" || job == "Elf" || job == "Halfling") {
-                    result = RollDice(1, 6) + stat;
-                } else if(job == "Fighter" || job == "Dwarf") {
-                    result = RollDice(1, 8) + stat;
-                } else {
-                    result = RollDice(1, 4) + stat;
+                if (searchClass == "Cleric" || searchClass == "Elf" || searchClass == "Halfling")
+                {
+                    for (int i = 0; i <= searchLevel - 1; i++)
+                    {
+                        result[i] = RollDice(1, 6) + constitution;
+
+                        if (result[i] <= 0)
+                        {
+                            result[i] = 1;
+                        }
+                    }
+                }
+                else if (searchClass == "Fighter" || searchClass == "Dwarf")
+                {
+                    for (int i = 0; i <= searchLevel - 1; i++)
+                    {
+                        result[i] = RollDice(1, 8) + constitution;
+
+                        if (result[i] <= 0)
+                        {
+                            result[i] = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i <= searchLevel - 1; i++)
+                    {
+                        result[i] = RollDice(1, 4) + constitution;
+
+                        if (result[i] <= 0)
+                        {
+                            result[i] = 1;
+                        }
+                    }
                 }
 
-                if (result <= 0) {      // Prevents negative starting HP
-                    result = 1;
-                }
+                int resultSum = result.Sum();
 
-                return result;
+                return resultSum;
             }
         }
 
@@ -249,31 +309,35 @@ namespace Dnd_Character_Generator
             return result;
         }
 
-        static void ReadCsv(string filePath, string searchClass, int searchlevel)
+        static int[] ReadCsv(string filePath, string searchClass, int searchlevel)
         {
+            int[] fileValues = new int[8];
+            int nextLevel = searchlevel + 1;
+
             var strLines = File.ReadLines(filePath);
             foreach (var line in strLines)
             {
-                if (line.Split(',')[0].Equals(searchClass) && line.Split(',')[1].Equals(searchlevel))
+                if (line.Split(',')[0].Equals(searchClass) && line.Split(',')[1].Equals(Convert.ToString(searchlevel)))
                 {
-                    int death = Convert.ToInt32(line.Split(',')[2]);
-                    int wands = Convert.ToInt32(line.Split(',')[3]);
-                    int paralysis = Convert.ToInt32(line.Split(',')[4]);
-                    int breath = Convert.ToInt32(line.Split(',')[5]);
-                    int spells = Convert.ToInt32(line.Split(',')[6]);
-                    int thac0 = Convert.ToInt32(line.Split(',')[7]);
-                    int xp = Convert.ToInt32(line.Split(',')[8]);
-
-                    Console.WriteLine(death);
-                    Console.WriteLine(wands);
-                    Console.WriteLine(paralysis);
-                    Console.WriteLine(breath);
-                    Console.WriteLine(spells);
-                    Console.WriteLine(thac0);
-                    Console.WriteLine(xp);
+                    fileValues[0] = Convert.ToInt32(line.Split(',')[2]);   // Death
+                    fileValues[1] = Convert.ToInt32(line.Split(',')[3]);   // Wands
+                    fileValues[2] = Convert.ToInt32(line.Split(',')[4]);   // Paralysis
+                    fileValues[3] = Convert.ToInt32(line.Split(',')[5]);   // Breath
+                    fileValues[4] = Convert.ToInt32(line.Split(',')[6]);   // Spells
+                    fileValues[5] = Convert.ToInt32(line.Split(',')[7]);   // THAC0
+                    fileValues[6] = Convert.ToInt32(line.Split(',')[8]);   // XP Requirement
                 }
             }
 
+            foreach (var line in strLines)
+            {
+                if (line.Split(',')[0].Equals(searchClass) && line.Split(',')[1].Equals(Convert.ToString(nextLevel)))
+                {
+                    fileValues[7] = Convert.ToInt32(line.Split(',')[8]);   // Next Level XP Threshold
+                }
+            }
+
+            return fileValues;
 
         }
     }
