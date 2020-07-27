@@ -145,6 +145,16 @@ namespace Dnd_Character_Generator
             xp = ReadCsv(filePath, charClass, level)[6];
             xpNext = ReadCsv(filePath, charClass, level)[7];
 
+            // ** Get Armor Values
+
+            string armorType = GetArmour(charClass);
+            Armor armorChoice = new Armor(armorType);
+
+            armorClass = armorChoice.armorClass - abilityMod[3];  // Modify armor class with dexterity
+            string armorName = armorChoice.name;
+
+            Console.WriteLine("Armor: " + armorName);
+            Console.WriteLine("AC: " + armorClass);
             Console.WriteLine("Class: " + charClass + "   Level: " + level);
             Console.WriteLine("XP: " + xp + ", XP to Next Level: " + xpNext);
             Console.WriteLine("XP Modifier: " + xpMod + "%");
@@ -317,6 +327,63 @@ namespace Dnd_Character_Generator
                 int resultSum = result.Sum();
 
                 return resultSum;
+            }
+
+            string GetArmour(string searchClass)
+            {
+                //  This function randomly chooses an armor from a predefined list in the Armor Class file.
+                //  It differentiates between characters that can and cannot use a shield or can and cannot wear armor
+               
+                int randomArmor = 0;
+                string result;
+
+                if (searchClass == "Magic-User")
+                {
+                    randomArmor = 1;
+                } else if (searchClass == "Thief")
+                {
+                    randomArmor = 2;
+                }
+                else
+                {
+                    int randomArmorRoll = rnd.Next(1, 101);
+
+                    if (randomArmorRoll >= 85)
+                    {
+                        randomArmor = 4;
+                    } else if (85 > randomArmorRoll && randomArmorRoll >= 55)
+                    {
+                        randomArmor = 3;
+                    } else if (55 > randomArmorRoll && randomArmorRoll >= 15)
+                    {
+                        randomArmor = 2;
+                    }
+                    else
+                    {
+                        randomArmor = 1;
+                    }
+                }
+
+                switch (randomArmor)
+                {
+                    case 1:
+                        result = "Unarmored";
+                        break;
+                    case 2:
+                        result = "Leather";
+                        break;
+                    case 3:
+                        result = "Chain Mail";
+                        break;
+                    case 4:
+                        result = "Plate Mail";
+                        break;
+                    default:
+                        result = "Unarmored";
+                        break;
+                }
+
+                return result;
             }
         }
 

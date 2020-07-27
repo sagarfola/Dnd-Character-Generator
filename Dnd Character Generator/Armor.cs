@@ -8,26 +8,30 @@ namespace Dnd_Character_Generator
 {
     class Armor
     {
-        private string name;
-        private int armorClass;
-        private int cost;
-        private int weight;
+        public string name;
+        public int armorClass;
+        public int cost;
+        public int weight;
 
-        public Armor(string name)
+        public Armor(string choice)
         { 
-            if (name == "Leather") {
+            if (choice == "Leather") {
+                name = "Leather";
                 armorClass = 7;
                 cost = 20;
                 weight = 200;
-            } else if (name == "Chain mail") {
+            } else if (choice == "Chain mail") {
+                name = "Chain mail";
                 armorClass = 5;
                 cost = 40;
                 weight = 400;
-            } else if (name == "Plate mail") {
+            } else if (choice == "Plate mail") {
+                name = "Plate Mail";
                 armorClass = 3;
                 cost = 60;
                 weight = 500;
-            } else if (name == "Shield") {
+            } else if (choice == "Shield") {
+                name = "Shield";
                 armorClass = -1;
                 cost = 10;
                 weight = 100;
